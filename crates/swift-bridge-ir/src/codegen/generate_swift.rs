@@ -356,9 +356,9 @@ fn gen_async_function_exposes_swift_to_rust(
         let task_body = format!(
             r#"do {{
             let result = try await {call_expression}
-            onSuccess(callbackWrapper, {ok_ffi_convert})
+            onSuccess(__cbWrapper.ptr, {ok_ffi_convert})
         }} catch let error as {err_swift_ty} {{
-            onError(callbackWrapper, {err_ffi_convert})
+            onError(__cbWrapper.ptr, {err_ffi_convert})
         }}"#
         );
 
@@ -418,9 +418,9 @@ func {prefixed_fn_name}__TypedThrowsCheck({checker_params}) async throws({err_sw
                 types,
                 TypePosition::FnReturn(func.host_lang),
             );
-            format!("callback(callbackWrapper, {convert})")
+            format!("callback(__cbWrapper.ptr, {convert})")
         } else {
-            "callback(callbackWrapper)".to_string()
+            "callback(__cbWrapper.ptr)".to_string()
         };
 
         let result_binding = if has_return_value {
@@ -439,6 +439,7 @@ func {prefixed_fn_name}__TypedThrowsCheck({checker_params}) async throws({err_sw
     format!(
         r#"@_cdecl("{link_name}")
 func {prefixed_fn_name} ({params_str}) {{
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task {{ @Sendable in
         {task_body}
     }}

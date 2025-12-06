@@ -1100,9 +1100,10 @@ mod extern_swift_async_function_no_return {
             r#"
 @_cdecl("__swift_bridge__$some_function")
 func __swift_bridge__some_function (_ callbackWrapper: UnsafeMutableRawPointer, _ callback: @escaping @convention(c) (UnsafeMutableRawPointer) -> Void) {
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task { @Sendable in
         let _ = await some_function()
-        callback(callbackWrapper)
+        callback(__cbWrapper.ptr)
     }
 }
 "#,
@@ -1176,9 +1177,10 @@ mod extern_swift_async_function_returns_u8 {
             r#"
 @_cdecl("__swift_bridge__$some_function")
 func __swift_bridge__some_function (_ callbackWrapper: UnsafeMutableRawPointer, _ callback: @escaping @convention(c) (UnsafeMutableRawPointer, UInt8) -> Void) {
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task { @Sendable in
         let result = await some_function()
-        callback(callbackWrapper, result)
+        callback(__cbWrapper.ptr, result)
     }
 }
 "#,
@@ -1252,9 +1254,10 @@ mod extern_swift_async_function_with_args {
             r#"
 @_cdecl("__swift_bridge__$some_function")
 func __swift_bridge__some_function (_ callbackWrapper: UnsafeMutableRawPointer, _ callback: @escaping @convention(c) (UnsafeMutableRawPointer, UInt8) -> Void, _ arg: UInt32) {
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task { @Sendable in
         let result = await some_function(arg: arg)
-        callback(callbackWrapper, result)
+        callback(__cbWrapper.ptr, result)
     }
 }
 "#,
@@ -1338,12 +1341,13 @@ mod extern_swift_async_function_returns_result {
             r#"
 @_cdecl("__swift_bridge__$some_function")
 func __swift_bridge__some_function (_ callbackWrapper: UnsafeMutableRawPointer, _ onSuccess: @escaping @convention(c) (UnsafeMutableRawPointer, UInt32) -> Void, _ onError: @escaping @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void) {
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task { @Sendable in
         do {
             let result = try await some_function()
-            onSuccess(callbackWrapper, result)
+            onSuccess(__cbWrapper.ptr, result)
         } catch let error as ErrorType {
-            onError(callbackWrapper, {error.isOwned = false; return error.ptr;}())
+            onError(__cbWrapper.ptr, {error.isOwned = false; return error.ptr;}())
         }
     }
 }
@@ -1432,12 +1436,13 @@ mod extern_swift_async_function_returns_result_with_args {
             r#"
 @_cdecl("__swift_bridge__$some_function")
 func __swift_bridge__some_function (_ callbackWrapper: UnsafeMutableRawPointer, _ onSuccess: @escaping @convention(c) (UnsafeMutableRawPointer, UInt32) -> Void, _ onError: @escaping @convention(c) (UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> Void, _ arg: UInt32) {
+    let __cbWrapper = __private__SendablePtrWrapper(callbackWrapper)
     Task { @Sendable in
         do {
             let result = try await some_function(arg: arg)
-            onSuccess(callbackWrapper, result)
+            onSuccess(__cbWrapper.ptr, result)
         } catch let error as ErrorType {
-            onError(callbackWrapper, {error.isOwned = false; return error.ptr;}())
+            onError(__cbWrapper.ptr, {error.isOwned = false; return error.ptr;}())
         }
     }
 }

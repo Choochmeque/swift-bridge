@@ -46,6 +46,14 @@ pub(super) fn write_core_swift_and_c(out_dir: &Path) {
 fn core_swift() -> String {
     let mut core_swift = "".to_string();
 
+    // Sendable wrapper for UnsafeMutableRawPointer used in async Swift function callbacks
+    core_swift += r#"
+struct __private__SendablePtrWrapper: @unchecked Sendable {
+    let ptr: UnsafeMutableRawPointer
+    init(_ ptr: UnsafeMutableRawPointer) { self.ptr = ptr }
+}
+"#;
+
     core_swift += STRING_SWIFT;
     core_swift += RUST_VEC_SWIFT;
 
