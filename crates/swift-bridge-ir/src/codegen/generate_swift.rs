@@ -439,7 +439,7 @@ func {prefixed_fn_name}__TypedThrowsCheck({checker_params}) async throws({err_sw
     format!(
         r#"@_cdecl("{link_name}")
 func {prefixed_fn_name} ({params_str}) {{
-    Task {{
+    Task {{ @Sendable in
         {task_body}
     }}
 }}{maybe_typed_throws_check}
